@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QLabel
+from FormElementsLibrary import FormElementsLibrary
 
 class FormBuilder(QWidget):
     def __init__(self):
@@ -6,14 +7,13 @@ class FormBuilder(QWidget):
         self.resize(400, 400)
         self.setAcceptDrops(True)
 
-        self.label = QLabel()
-        self.label.setWindowTitle("just label")
+        self.library = FormElementsLibrary()
+        self.library.setWindowTitle("elements library")
     
     def closeEvent(self, event):
-        self.label.close()
+        self.library.close()
         event.accept()
         
-    
     def show(self):
         super().show()
-        self.label.show()
+        self.library.show()
