@@ -1,6 +1,12 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PySide6.QtGui import QPixmap
+from enum import Enum
 import res.LibElementIcons_rc as LibElementIcons_rc
+
+class LibElement(Enum):
+    LABEL = "LABEL"
+    TEXT_INPUT = "TEXT_INPUT"
+
 
 class FormElementsLibrary(QWidget):
     def __init__(self):
