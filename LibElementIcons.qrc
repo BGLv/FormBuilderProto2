@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/libElements">
+        <file>labelIcon.png</file>
+        <file>lineEditIcon.png</file>
+    </qresource>
+</RCC>
