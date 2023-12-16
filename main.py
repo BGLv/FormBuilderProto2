@@ -4,9 +4,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from formBuilder import FormBuilder
 
-app = QApplication(sys.argv)
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
 
-builder = FormBuilder()
-builder.show()
+    builder = FormBuilder()
+    builder.show()
 
-sys.exit(app.exec_())
+    sys.exit(app.exec_())
