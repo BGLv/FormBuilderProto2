@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PySide6.QtGui import QPixmap
-import LibElementIcons_rc
+import res.LibElementIcons_rc as LibElementIcons_rc
 
 class FormElementsLibrary(QWidget):
     def __init__(self):
