@@ -2,7 +2,7 @@ import sys, os
 from PySide6.QtWidgets import QApplication, QWidget, QLabel
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-from formBuilder import FormBuilder
+from FormBuilder import FormBuilder
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
