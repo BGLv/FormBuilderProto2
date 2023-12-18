@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QLineEdit
 from PySide6.QtGui import QDragMoveEvent, QDrag, QMouseEvent, QPixmap, QScreen
 from PySide6.QtCore import Qt, QMimeData
 from enum import Enum
@@ -43,7 +43,7 @@ class FormElementsLibrary(QWidget):
         drag = QDrag(self)
         mimeData = QMimeData()
         drag.setMimeData(mimeData)
-        pixmap = self.newLabelPixmap()
+        pixmap = self.newLineEditPixmap()
         drag.setPixmap(pixmap)
         dropAction = drag.exec() 
         print("start drag")
@@ -54,3 +54,8 @@ class FormElementsLibrary(QWidget):
         label.setStyleSheet("QLabel { background-color : transparent; color : black; }")
         label.setText("label")
         return label.grab()
+    
+    def newLineEditPixmap(self) -> QPixmap:
+        lineEdit = QLineEdit()
+        lineEdit.setGeometry(0, 0, 60, 15)
+        return lineEdit.grab()
