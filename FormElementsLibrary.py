@@ -4,9 +4,16 @@ from PySide6.QtCore import Qt, QMimeData
 from enum import Enum
 import res.LibElementIcons_rc as LibElementIcons_rc
 
-class LibElement(Enum):
+class LibElementType(Enum):
     LABEL = "LABEL"
     TEXT_INPUT = "TEXT_INPUT"
+
+class LibElementMimeData(QMimeData):
+    elementType: LibElementType
+
+    def __init__(self, type: LibElementType) -> None:
+        super().__init__()
+        self.elementType = type
 
 
 class FormElementsLibrary(QWidget):
@@ -41,15 +48,17 @@ class FormElementsLibrary(QWidget):
 
     def startDrag(self):
         drag = QDrag(self)
-        mimeData = QMimeData()
-        drag.setMimeData(mimeData)
+        mimeData: LibElementMimeData = None
         pixmap: QPixmap = None
         if self.label_icon_label.geometry().contains(self._dragStartPos):
+            mimeData = LibElementMimeData(LibElementType.LABEL)
             pixmap = self.newLabelPixmap()
         if self.line_edit_icon_label.geometry().contains(self._dragStartPos):
+            mimeData = LibElementMimeData(LibElementType.TEXT_INPUT)
             pixmap = self.newLineEditPixmap()
         if pixmap is None:
             return
+        drag.setMimeData(mimeData)
         drag.setPixmap(pixmap)
         dropAction = drag.exec() 
         print("start drag")
