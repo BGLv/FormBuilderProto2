@@ -21,9 +21,12 @@ class FormBuilder(QWidget):
         super().show()
         self.library.show()
 
+    #####################################
+    # Drag and Drop
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         if isinstance(event.mimeData(), LibElementMimeData):
             event.acceptProposedAction()
 
     def dropEvent(self, event: QDropEvent) -> None:
         return super().dropEvent(event)
+    #####################################
