@@ -34,7 +34,7 @@ class FormElementsLibrary(QWidget):
             self._dragStartPos = event.pos()
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        if event.buttons() == Qt.LeftButton :
+        if (event.buttons() & Qt.LeftButton) and (self._dragStartPos is not None):
             distance = (event.pos() - self._dragStartPos).manhattanLength()
             if distance > QApplication.startDragDistance() :
                 self.startDrag()
