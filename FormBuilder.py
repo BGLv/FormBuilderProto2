@@ -12,7 +12,9 @@ class FormBuilder(QWidget):
 
         self.library = FormElementsLibrary()
         self.library.setWindowTitle("elements library")
-    
+
+    #####################################
+    # Lifecycle
     def closeEvent(self, event):
         self.library.close()
         event.accept()
@@ -20,6 +22,7 @@ class FormBuilder(QWidget):
     def show(self):
         super().show()
         self.library.show()
+    ####################################
 
     #####################################
     # Drag and Drop
