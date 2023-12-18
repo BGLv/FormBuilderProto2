@@ -26,14 +26,25 @@ class FormElementsLibrary(QWidget):
         self.setLayout(layout)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
+        self.saveDragStartPos(event)
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self.canStartDrag(event) :
+            self.startDrag()
+
+    #################################
+    # Drag and Drop
+    def saveDragStartPos(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton :
             self._dragStartPos = event.pos()
 
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+    def canStartDrag(self, event: QMouseEvent) -> bool:
+        result: bool = False
         if (event.buttons() & Qt.LeftButton) and (self._dragStartPos is not None):
             distance = (event.pos() - self._dragStartPos).manhattanLength()
             if distance > QApplication.startDragDistance() :
-                self.startDrag()
+                result = True
+        return result
 
     def startDrag(self):
         drag = QDrag(self)
@@ -51,6 +62,7 @@ class FormElementsLibrary(QWidget):
         drag.setPixmap(pixmap)
         dropAction = drag.exec(Qt.DropAction.CopyAction) 
         print("start drag")
+    #################################
 
     # utility
     def newLabelPixmap(self) -> QPixmap:
