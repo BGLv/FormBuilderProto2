@@ -43,11 +43,14 @@ class FormElementsLibrary(QWidget):
         drag = QDrag(self)
         mimeData = QMimeData()
         drag.setMimeData(mimeData)
+        pixmap = self.newLabelPixmap()
+        drag.setPixmap(pixmap)
+        dropAction = drag.exec() 
+        print("start drag")
+
+    def newLabelPixmap(self) -> QPixmap:
         label = QLabel()
         label.setGeometry(0, 0, 50, 15)
         label.setStyleSheet("QLabel { background-color : transparent; color : black; }")
         label.setText("label")
-        pixmap = label.grab()
-        drag.setPixmap(pixmap)
-        dropAction = drag.exec() 
-        print("start drag")
+        return label.grab()
