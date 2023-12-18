@@ -3,18 +3,7 @@ from PySide6.QtGui import QDragMoveEvent, QDrag, QMouseEvent, QPixmap, QScreen
 from PySide6.QtCore import Qt, QMimeData
 from enum import Enum
 import res.LibElementIcons_rc as LibElementIcons_rc
-
-class LibElementType(Enum):
-    LABEL = "LABEL"
-    TEXT_INPUT = "TEXT_INPUT"
-
-class LibElementMimeData(QMimeData):
-    elementType: LibElementType
-
-    def __init__(self, type: LibElementType) -> None:
-        super().__init__()
-        self.elementType = type
-
+from LibElementMimeData import *
 
 class FormElementsLibrary(QWidget):
     def __init__(self):
@@ -60,7 +49,7 @@ class FormElementsLibrary(QWidget):
             return
         drag.setMimeData(mimeData)
         drag.setPixmap(pixmap)
-        dropAction = drag.exec() 
+        dropAction = drag.exec(Qt.DropAction.CopyAction) 
         print("start drag")
 
     # utility

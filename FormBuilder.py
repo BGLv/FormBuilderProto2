@@ -1,5 +1,8 @@
+from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import QWidget, QLabel
+from PySide6.QtCore import Qt, QMimeData
 from FormElementsLibrary import FormElementsLibrary
+from LibElementMimeData import *
 
 class FormBuilder(QWidget):
     def __init__(self):
@@ -17,3 +20,10 @@ class FormBuilder(QWidget):
     def show(self):
         super().show()
         self.library.show()
+
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        if isinstance(event.mimeData(), LibElementMimeData):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent) -> None:
+        return super().dropEvent(event)
