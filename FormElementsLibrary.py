@@ -43,7 +43,13 @@ class FormElementsLibrary(QWidget):
         drag = QDrag(self)
         mimeData = QMimeData()
         drag.setMimeData(mimeData)
-        pixmap = self.newLineEditPixmap()
+        pixmap: QPixmap = None
+        if self.label_icon_label.geometry().contains(self._dragStartPos):
+            pixmap = self.newLabelPixmap()
+        if self.line_edit_icon_label.geometry().contains(self._dragStartPos):
+            pixmap = self.newLineEditPixmap()
+        if pixmap is None:
+            return
         drag.setPixmap(pixmap)
         dropAction = drag.exec() 
         print("start drag")
