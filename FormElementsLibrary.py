@@ -48,6 +48,7 @@ class FormElementsLibrary(QWidget):
         dropAction = drag.exec() 
         print("start drag")
 
+    # utility
     def newLabelPixmap(self) -> QPixmap:
         label = QLabel()
         label.setGeometry(0, 0, 50, 15)
