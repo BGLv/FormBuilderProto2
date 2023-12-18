@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
-from PySide6.QtGui import QDragMoveEvent, QMouseEvent, QPixmap
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QDragMoveEvent, QDrag, QMouseEvent, QPixmap, QScreen
+from PySide6.QtCore import Qt, QMimeData
 from enum import Enum
 import res.LibElementIcons_rc as LibElementIcons_rc
 
@@ -40,4 +40,14 @@ class FormElementsLibrary(QWidget):
                 self.startDrag()
 
     def startDrag(self):
+        drag = QDrag(self)
+        mimeData = QMimeData()
+        drag.setMimeData(mimeData)
+        label = QLabel()
+        label.setGeometry(0, 0, 50, 15)
+        label.setStyleSheet("QLabel { background-color : transparent; color : black; }")
+        label.setText("label")
+        pixmap = label.grab()
+        drag.setPixmap(pixmap)
+        dropAction = drag.exec() 
         print("start drag")
