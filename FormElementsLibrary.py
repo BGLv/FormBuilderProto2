@@ -56,7 +56,7 @@ class FormElementsLibrary(QWidget):
         if self.line_edit_icon_label.geometry().contains(self._dragStartPos):
             mimeData = LibElementMimeData(LibElementType.TEXT_INPUT)
             pixmap = self.newLineEditPixmap()
-        if pixmap is None:
+        if pixmap is None or mimeData is None:
             return
         drag.setMimeData(mimeData)
         drag.setPixmap(pixmap)
