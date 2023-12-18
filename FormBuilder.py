@@ -31,5 +31,13 @@ class FormBuilder(QWidget):
             event.acceptProposedAction()
 
     def dropEvent(self, event: QDropEvent) -> None:
-        return super().dropEvent(event)
+        if not isinstance(event.mimeData(), LibElementMimeData):
+            return
+        elementMimeData: LibElementMimeData = event.mimeData()
+        match elementMimeData.elementType:
+            case LibElementType.LABEL:
+                print("lbl")
+            case LibElementType.TEXT_INPUT:
+                print("txtinp")
+
     #####################################
