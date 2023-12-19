@@ -35,12 +35,12 @@ class FormElementsLibrary(QWidget):
     #################################
     # Drag and Drop
     def saveDragStartPos(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton :
+        if event.button() == Qt.MouseButton.LeftButton :
             self._dragStartPos = event.pos()
 
     def canStartDrag(self, event: QMouseEvent) -> bool:
         result: bool = False
-        if (event.buttons() & Qt.LeftButton) and (self._dragStartPos is not None):
+        if (event.buttons() & Qt.MouseButton.LeftButton) and (self._dragStartPos is not None):
             distance = (event.pos() - self._dragStartPos).manhattanLength()
             if distance > QApplication.startDragDistance() :
                 result = True
