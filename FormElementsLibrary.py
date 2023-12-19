@@ -1,9 +1,9 @@
-from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QLineEdit
-from PySide6.QtGui import QDragMoveEvent, QDrag, QMouseEvent, QPixmap, QScreen
-from PySide6.QtCore import Qt, QMimeData
-from enum import Enum
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QLineEdit
+from PySide6.QtGui import QDrag, QMouseEvent, QPixmap
+from PySide6.QtCore import Qt
 import res.LibElementIcons_rc as LibElementIcons_rc
 from LibElementMimeData import *
+from DragStartHelper import *
 
 class FormElementsLibrary(QWidget):
     def __init__(self):
@@ -24,36 +24,25 @@ class FormElementsLibrary(QWidget):
         layout.addStretch(1)
 
         self.setLayout(layout)
+        self.dragStartHelper = DragStartHelper()
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        self.saveDragStartPos(event)
+        self.dragStartHelper.saveDragStartPos(event)
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        if self.canStartDrag(event) :
+        if self.dragStartHelper.canStartDrag(event) :
             self.startDrag()
 
     #################################
     # Drag and Drop
-    def saveDragStartPos(self, event: QMouseEvent):
-        if event.button() == Qt.MouseButton.LeftButton :
-            self._dragStartPos = event.pos()
-
-    def canStartDrag(self, event: QMouseEvent) -> bool:
-        result: bool = False
-        if (event.buttons() & Qt.MouseButton.LeftButton) and (self._dragStartPos is not None):
-            distance = (event.pos() - self._dragStartPos).manhattanLength()
-            if distance > QApplication.startDragDistance() :
-                result = True
-        return result
-
     def startDrag(self):
         drag = QDrag(self)
         mimeData: LibElementMimeData = None
         pixmap: QPixmap = None
-        if self.label_icon_label.geometry().contains(self._dragStartPos):
+        if self.label_icon_label.geometry().contains(self.dragStartHelper.dragStartPos):
             mimeData = LibElementMimeData(LibElementType.LABEL)
             pixmap = self.newLabelPixmap()
-        if self.line_edit_icon_label.geometry().contains(self._dragStartPos):
+        if self.line_edit_icon_label.geometry().contains(self.dragStartHelper.dragStartPos):
             mimeData = LibElementMimeData(LibElementType.TEXT_INPUT)
             pixmap = self.newLineEditPixmap()
         if pixmap is None or mimeData is None:
