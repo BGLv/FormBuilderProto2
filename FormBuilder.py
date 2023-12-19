@@ -81,9 +81,7 @@ class FormBuilder(QWidget):
                 result.setEnabled(False)
         return result
     
-    ######## we can drag widget which are currently on canvas
     def widgetToDrag(self) -> QWidget:
         return self.childAt(self.dragStartHelper.dragStartPos)
     
-
     #####################################
