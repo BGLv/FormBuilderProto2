@@ -9,6 +9,7 @@ from DragStartHelper import *
 class FormBuilder(QWidget):
     def __init__(self):
         super().__init__()
+        self.cachedElementSize = {}
         self.dropPlaceRect = None
         self.resize(400, 400)
         self.setAcceptDrops(True)
@@ -69,23 +70,7 @@ class FormBuilder(QWidget):
 
     def dragMoveEvent(self, event: QDragMoveEvent) -> None:
         event.accept()
-        if isinstance(event.mimeData(), LibElementMimeData):
-            widget = self.widgetFor(event.mimeData())
-            widget.setParent(self)
-            widget.show()
-            self.dropPlaceRect = QRect(event.pos(), widget.size())
-            widget.setParent(None)
-        if isinstance(event.mimeData(), MoveWidgetMimeData):
-            widget = event.mimeData().widget
-            self.dropPlaceRect = QRect(event.pos(), widget.size())
-        if widget is None:
-            self.dropPlaceRect = None
-        self.update()
-
-    def hideDropPlaceRect(self):
-        self.dropPlaceRect = None
-        self.update()
-
+        self.updateDropPlaceRectFor(event)
 
     def dropEvent(self, event: QDropEvent) -> None:
         event.accept()
@@ -115,5 +100,39 @@ class FormBuilder(QWidget):
     
     def widgetToDrag(self) -> QWidget:
         return self.childAt(self.dragStartHelper.dragStartPos)
+    
+    # Drop place hint rectangle
+    def updateDropPlaceRectFor(self, event: QDragMoveEvent):
+        size: QSize
+        if isinstance(event.mimeData(), LibElementMimeData):
+            mimeData: LibElementMimeData = event.mimeData()
+            if mimeData.elementType in self.cachedElementSize:
+                size = self.cachedElementSize[mimeData.elementType]
+            else:
+                size = self.calculateDropPlaceSizeFrom(mimeData)
+                self.cachedElementSize[mimeData.elementType] = size
+     
+        if isinstance(event.mimeData(), MoveWidgetMimeData):
+            widget = event.mimeData().widget
+            size = widget.size()
+        
+        if size is None:
+            self.dropPlaceRect = None
+        else:
+            self.dropPlaceRect = QRect(event.pos(), size)
+        self.update()
+
+
+    def calculateDropPlaceSizeFrom(self, mimeData: LibElementMimeData):
+        widget = self.widgetFor(mimeData)
+        widget.setParent(self)
+        widget.show()
+        size = widget.size()
+        widget.setParent(None)
+        return size
+
+    def hideDropPlaceRect(self):
+        self.dropPlaceRect = None
+        self.update()
     
     #####################################
