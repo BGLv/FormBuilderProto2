@@ -1,6 +1,6 @@
-from PySide6.QtGui import QDrag, QPixmap, QDragEnterEvent, QDropEvent, QMouseEvent
+from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnterEvent, QDropEvent, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QRect, QSize
 from FormElementsLibrary import FormElementsLibrary
 from mimeData.LibElementMimeData import *
 from mimeData.MoveWidgetMimeData import *
@@ -9,6 +9,7 @@ from DragStartHelper import *
 class FormBuilder(QWidget):
     def __init__(self):
         super().__init__()
+        self.dropPlaceRect = None
         self.resize(400, 400)
         self.setAcceptDrops(True)
 
@@ -35,6 +36,15 @@ class FormBuilder(QWidget):
             if widgetToDrag is not None:
                 self.startDrag(widgetToDrag)
 
+    def paintEvent(self, event: QPaintEvent) -> None:
+        if self.dropPlaceRect is not None:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.Antialiasing)
+            pen = QPen(Qt.black, 2, Qt.DashLine)
+            painter.setPen(pen)
+            painter.drawRect(self.dropPlaceRect)
+
+
     ####################################
 
     #####################################
@@ -57,7 +67,24 @@ class FormBuilder(QWidget):
         if isinstance(event.mimeData(), MoveWidgetMimeData):
             event.acceptProposedAction()
 
+    def dragMoveEvent(self, event: QDragMoveEvent) -> None:
+        event.accept()
+        if isinstance(event.mimeData(), LibElementMimeData):
+            widget = self.widgetFor(event.mimeData())
+            widget.setParent(self)
+            widget.show()
+            self.dropPlaceRect = QRect(event.pos(), widget.size())
+            widget.setParent(None)
+        if isinstance(event.mimeData(), MoveWidgetMimeData):
+            widget = event.mimeData().widget
+            self.dropPlaceRect = QRect(event.pos(), widget.size())
+        if widget is None:
+            self.dropPlaceRect = None
+        self.update()
+
+
     def dropEvent(self, event: QDropEvent) -> None:
+        event.accept()
         widget: QWidget
         if isinstance(event.mimeData(), LibElementMimeData):
             widget = self.widgetFor(event.mimeData())
@@ -68,6 +95,8 @@ class FormBuilder(QWidget):
         widget.move(event.pos())
         widget.setParent(self)
         widget.show()
+        self.dropPlaceRect = None
+        self.update()
 
     def widgetFor(self, mimeData: LibElementMimeData) -> QWidget:
         result = None

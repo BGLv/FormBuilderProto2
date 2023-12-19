@@ -56,12 +56,10 @@ class FormElementsLibrary(QWidget):
     # utility
     def newLabelPixmap(self) -> QPixmap:
         label = QLabel()
-        label.setGeometry(0, 0, 50, 15)
         label.setStyleSheet("QLabel { background-color : transparent; color : black; }")
         label.setText("label")
         return label.grab()
     
     def newLineEditPixmap(self) -> QPixmap:
         lineEdit = QLineEdit()
-        lineEdit.setGeometry(0, 0, 60, 15)
         return lineEdit.grab()
