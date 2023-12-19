@@ -82,6 +82,10 @@ class FormBuilder(QWidget):
             self.dropPlaceRect = None
         self.update()
 
+    def hideDropPlaceRect(self):
+        self.dropPlaceRect = None
+        self.update()
+
 
     def dropEvent(self, event: QDropEvent) -> None:
         event.accept()
@@ -95,8 +99,7 @@ class FormBuilder(QWidget):
         widget.move(event.pos())
         widget.setParent(self)
         widget.show()
-        self.dropPlaceRect = None
-        self.update()
+        self.hideDropPlaceRect()
 
     def widgetFor(self, mimeData: LibElementMimeData) -> QWidget:
         result = None
