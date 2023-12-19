@@ -1,5 +1,5 @@
 from PySide6.QtGui import QDragEnterEvent, QDropEvent
-from PySide6.QtWidgets import QWidget, QLabel
+from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
 from PySide6.QtCore import Qt, QMimeData
 from FormElementsLibrary import FormElementsLibrary
 from LibElementMimeData import *
@@ -33,11 +33,19 @@ class FormBuilder(QWidget):
     def dropEvent(self, event: QDropEvent) -> None:
         if not isinstance(event.mimeData(), LibElementMimeData):
             return
-        elementMimeData: LibElementMimeData = event.mimeData()
-        match elementMimeData.elementType:
-            case LibElementType.LABEL:
-                print("lbl")
-            case LibElementType.TEXT_INPUT:
-                print("txtinp")
+        widget = self.widgetFor(event.mimeData())
+        widget.move(event.pos())
+        widget.setParent(self)
+        widget.show()
 
+    def widgetFor(self, mimeData: LibElementMimeData) -> QWidget:
+        result = None
+        match mimeData.elementType:
+            case LibElementType.LABEL:
+                result = QLabel()
+                result.setText("test label")
+            case LibElementType.TEXT_INPUT:
+                result = QLineEdit()
+                result.setReadOnly(True)
+        return result
     #####################################
