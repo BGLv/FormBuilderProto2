@@ -1,5 +1,6 @@
 from PySide6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
+from PySide6.QtCore import Qt
 from FormElementsLibrary import FormElementsLibrary
 from LibElementMimeData import *
 from DragStartHelper import *
@@ -26,6 +27,13 @@ class FormBuilder(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         self.dragStartHelper.saveDragStartPos(event)
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self.dragStartHelper.canStartDrag(event):
+            widgetToDrag = self.widgetToDrag()
+            if widgetToDrag is not None:
+                widgetToDrag.setParent(None)
+
     ####################################
 
     #####################################
@@ -51,11 +59,12 @@ class FormBuilder(QWidget):
             case LibElementType.TEXT_INPUT:
                 result = QLineEdit()
                 result.setReadOnly(True)
+                result.setEnabled(False)
         return result
     
     ######## we can drag widget which are currently on canvas
-    
-
+    def widgetToDrag(self) -> QWidget:
+        return self.childAt(self.dragStartHelper.dragStartPos)
     
 
     #####################################
