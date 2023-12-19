@@ -1,8 +1,9 @@
-from PySide6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent
+from PySide6.QtGui import QDrag, QPixmap, QDragEnterEvent, QDropEvent, QMouseEvent
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
 from PySide6.QtCore import Qt
 from FormElementsLibrary import FormElementsLibrary
-from LibElementMimeData import *
+from mimeData.LibElementMimeData import *
+from mimeData.MoveWidgetMimeData import *
 from DragStartHelper import *
 
 class FormBuilder(QWidget):
@@ -32,20 +33,38 @@ class FormBuilder(QWidget):
         if self.dragStartHelper.canStartDrag(event):
             widgetToDrag = self.widgetToDrag()
             if widgetToDrag is not None:
-                widgetToDrag.setParent(None)
+                self.startDrag(widgetToDrag)
 
     ####################################
 
     #####################################
     # Drag and Drop
+    def startDrag(self, widget: QWidget):
+        widget.setParent(None)
+        drag = QDrag(self)
+        mimeData = MoveWidgetMimeData()
+        mimeData.setWidget(widget)
+        pixmap: QPixmap = widget.grab()
+        if pixmap is None or mimeData is None:
+            return
+        drag.setMimeData(mimeData)
+        drag.setPixmap(pixmap)
+        dropAction = drag.exec(Qt.DropAction.MoveAction)             
+    
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         if isinstance(event.mimeData(), LibElementMimeData):
             event.acceptProposedAction()
+        if isinstance(event.mimeData(), MoveWidgetMimeData):
+            event.acceptProposedAction()
 
     def dropEvent(self, event: QDropEvent) -> None:
-        if not isinstance(event.mimeData(), LibElementMimeData):
+        widget: QWidget
+        if isinstance(event.mimeData(), LibElementMimeData):
+            widget = self.widgetFor(event.mimeData())
+        if isinstance(event.mimeData(), MoveWidgetMimeData):
+            widget = event.mimeData().widget
+        if widget is None:
             return
-        widget = self.widgetFor(event.mimeData())
         widget.move(event.pos())
         widget.setParent(self)
         widget.show()

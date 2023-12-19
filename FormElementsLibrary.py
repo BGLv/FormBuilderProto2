@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QLineEdit
 from PySide6.QtGui import QDrag, QMouseEvent, QPixmap
 from PySide6.QtCore import Qt
 import res.LibElementIcons_rc as LibElementIcons_rc
-from LibElementMimeData import *
+from mimeData.LibElementMimeData import *
 from DragStartHelper import *
 
 class FormElementsLibrary(QWidget):
