@@ -65,11 +65,19 @@ class FormBuilder(QWidget):
     def paintEvent(self, event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
+        self.handleDropPlaceRectDrawing(painter)
+        self.handleSelectedWidgetDrawing(painter)
+
+    ####################################
+    # drawing
+    def handleDropPlaceRectDrawing(self, painter: QPainter):
         if self.dropPlaceRect is not None:
             pen = QPen(Qt.black, 2, Qt.DashLine)
             painter.setPen(pen)
             painter.drawRect(self.dropPlaceRect)
-        if self.selectedWidget is not None and self.selectedWidget.parent() is not None:
+
+    def handleSelectedWidgetDrawing(self, painter: QPainter):
+         if self.selectedWidget is not None and self.selectedWidget.parent() is not None:
             pen = QPen(Qt.blue, 1, Qt.SolidLine)
             painter.setPen(pen)
             painter.drawRect(self.selectedWidget.geometry())
