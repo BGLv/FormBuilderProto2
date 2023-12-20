@@ -52,6 +52,13 @@ class FormBuilder(QWidget):
             if widgetToDrag is not None:
                 self.startDrag(widgetToDrag)
 
+    def keyPressEvent(self, event):
+       if event.key() in [Qt.Key_Delete, Qt.Key_Backspace]:
+           self.selectedWidget.setParent(None)
+           self.selectedWidget = None
+           self.update()
+       super().keyPressEvent(event)
+
     def paintEvent(self, event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
