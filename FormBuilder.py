@@ -18,6 +18,7 @@ class FormBuilder(QWidget):
         self.formStorage = FormStorage()
         self.cachedElementSize = {}
         self.dropPlaceRect = None
+        self.selectedWidget = None
         self.resize(400, 400)
         self.setAcceptDrops(True)
 
@@ -39,6 +40,11 @@ class FormBuilder(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         self.dragStartHelper.saveDragStartPos(event)
+        if event.button() == Qt.MouseButton.LeftButton :
+            self.selectedWidget = self.childAt(event.pos())
+        else:
+            self.selectedWidget = None
+        self.update()
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self.dragStartHelper.canStartDrag(event):
@@ -47,12 +53,17 @@ class FormBuilder(QWidget):
                 self.startDrag(widgetToDrag)
 
     def paintEvent(self, event: QPaintEvent) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
         if self.dropPlaceRect is not None:
-            painter = QPainter(self)
-            painter.setRenderHint(QPainter.Antialiasing)
             pen = QPen(Qt.black, 2, Qt.DashLine)
             painter.setPen(pen)
             painter.drawRect(self.dropPlaceRect)
+        if self.selectedWidget is not None and self.selectedWidget.parent() is not None:
+            pen = QPen(Qt.blue, 1, Qt.SolidLine)
+            painter.setPen(pen)
+            painter.drawRect(self.selectedWidget.geometry())
+
 
     #####################################
     # Drag and Drop
