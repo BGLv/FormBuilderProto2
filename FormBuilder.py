@@ -24,6 +24,7 @@ class FormBuilder(QWidget):
         self.library = FormElementsLibrary()
         self.library.setWindowTitle("elements library")
         self.dragStartHelper = DragStartHelper()
+        self.restoreBuilderState()
 
     #####################################
     # Lifecycle
@@ -163,7 +164,7 @@ class FormBuilder(QWidget):
         file = QFile(fileName)
         if file.open(QFile.WriteOnly | QFile.Text):
             text_stream = QTextStream(file)
-            domDocument.save(text_stream, 4)  # Save the document to the XML writer with indentation
+            domDocument.save(text_stream, 4)
             file.close()
 
         
@@ -173,3 +174,19 @@ class FormBuilder(QWidget):
         window.setAttribute("y", geometry.y())
         window.setAttribute("width", geometry.width())
         window.setAttribute("height", geometry.height())
+
+    ####################################
+    # restore
+    def restoreBuilderState(self):
+        fileName = "form.xml"
+        file = QFile(fileName)
+        domDocument = QDomDocument()
+        if file.open(QFile.ReadOnly | QFile.Text):
+            if domDocument.setContent(file):
+                root = domDocument.documentElement()
+                self.setGeometry(
+                    int(root.attribute("x")),
+                    int(root.attribute("y")),
+                    int(root.attribute("width")),
+                    int(root.attribute("height"))
+                )
