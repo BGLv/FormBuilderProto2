@@ -1,6 +1,6 @@
 from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnterEvent, QDropEvent, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
-from PySide6.QtCore import Qt, QRect, QSize, QFile, QTextStream, QXmlStreamWriter
+from PySide6.QtCore import Qt, QRect, QPoint, QSize, QFile, QTextStream, QXmlStreamWriter
 from FormElementsLibrary import FormElementsLibrary
 from metaClasses.SingletonMeta import SingletonMeta
 from mimeData.LibElementMimeData import *
@@ -36,6 +36,9 @@ class FormBuilder(QWidget):
         
     def show(self):
         super().show()
+        libXPos = self.geometry().topRight().x() + 5
+        libYPos = self.geometry().topRight().y()
+        self.library.move(QPoint(libXPos, libYPos))
         self.library.show()
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
