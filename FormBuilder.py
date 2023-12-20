@@ -184,9 +184,12 @@ class FormBuilder(QWidget):
         if file.open(QFile.ReadOnly | QFile.Text):
             if domDocument.setContent(file):
                 root = domDocument.documentElement()
-                self.setGeometry(
-                    int(root.attribute("x")),
-                    int(root.attribute("y")),
-                    int(root.attribute("width")),
-                    int(root.attribute("height"))
-                )
+                try:
+                    self.setGeometry(
+                        int(root.attribute("x", str(self.geometry().x()))),
+                        int(root.attribute("y", str(self.geometry().y()))),
+                        int(root.attribute("width", str(self.geometry().width()))),
+                        int(root.attribute("height", str(self.geometry().height())))
+                    )
+                except ValueError as e:
+                    pass
