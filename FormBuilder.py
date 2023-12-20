@@ -1,14 +1,21 @@
 from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnterEvent, QDropEvent, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
-from PySide6.QtCore import Qt, QRect, QSize
+from PySide6.QtCore import Qt, QRect, QSize, QFile, QTextStream, QXmlStreamWriter
 from FormElementsLibrary import FormElementsLibrary
+from metaClasses.SingletonMeta import SingletonMeta
 from mimeData.LibElementMimeData import *
 from mimeData.MoveWidgetMimeData import *
 from DragStartHelper import *
+from PySide6.QtXml import QDomDocument, QDomElement
+
+class FormStorage(metaclass=SingletonMeta):
+    def saveGeometry(self, geometry: QRect):
+        print("geom saved")
 
 class FormBuilder(QWidget):
     def __init__(self):
         super().__init__()
+        self.formStorage = FormStorage()
         self.cachedElementSize = {}
         self.dropPlaceRect = None
         self.resize(400, 400)
@@ -22,6 +29,7 @@ class FormBuilder(QWidget):
     # Lifecycle
     def closeEvent(self, event):
         self.library.close()
+        self.saveBuilderState()
         event.accept()
         
     def show(self):
@@ -44,9 +52,6 @@ class FormBuilder(QWidget):
             pen = QPen(Qt.black, 2, Qt.DashLine)
             painter.setPen(pen)
             painter.drawRect(self.dropPlaceRect)
-
-
-    ####################################
 
     #####################################
     # Drag and Drop
@@ -136,3 +141,35 @@ class FormBuilder(QWidget):
         self.update()
     
     #####################################
+        
+    ####################################
+    # Save
+    def saveBuilderState(self):
+        domDocument = QDomDocument()
+        window = domDocument.createElement("window")
+        self.appendGeometryAttributesTo(window, self.geometry())
+        domDocument.appendChild(window)
+        for widget in self.children():
+            if isinstance(widget, QLabel):
+                labelDom = domDocument.createElement("label") 
+                self.appendGeometryAttributesTo(labelDom, widget.geometry())
+                window.appendChild(labelDom)
+            if isinstance(widget, QLineEdit):
+                lineEditDom = domDocument.createElement("lineEdit")
+                self.appendGeometryAttributesTo(lineEditDom, widget.geometry())
+                window.appendChild(lineEditDom)
+        
+        fileName = "form.xml"
+        file = QFile(fileName)
+        if file.open(QFile.WriteOnly | QFile.Text):
+            text_stream = QTextStream(file)
+            domDocument.save(text_stream, 4)  # Save the document to the XML writer with indentation
+            file.close()
+
+        
+        #self.formStorage.saveGeometry(self.geometry())
+    def appendGeometryAttributesTo(self, window: QDomElement, geometry: QRect):
+        window.setAttribute("x", geometry.x())
+        window.setAttribute("y", geometry.y())
+        window.setAttribute("width", geometry.width())
+        window.setAttribute("height", geometry.height())
