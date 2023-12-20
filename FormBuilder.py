@@ -6,7 +6,7 @@ from metaClasses.SingletonMeta import SingletonMeta
 from mimeData.LibElementMimeData import *
 from mimeData.MoveWidgetMimeData import *
 from DragStartHelper import *
-from PySide6.QtXml import QDomDocument, QDomElement
+from PySide6.QtXml import QDomDocument, QDomElement, QDomNode
 
 class FormStorage(metaclass=SingletonMeta):
     def saveGeometry(self, geometry: QRect):
@@ -82,7 +82,7 @@ class FormBuilder(QWidget):
         event.accept()
         widget: QWidget
         if isinstance(event.mimeData(), LibElementMimeData):
-            widget = self.widgetFor(event.mimeData())
+            widget = self.widgetFor(event.mimeData().elementType)
         if isinstance(event.mimeData(), MoveWidgetMimeData):
             widget = event.mimeData().widget
         if widget is None:
@@ -92,9 +92,9 @@ class FormBuilder(QWidget):
         widget.show()
         self.hideDropPlaceRect()
 
-    def widgetFor(self, mimeData: LibElementMimeData) -> QWidget:
+    def widgetFor(self, elementType: LibElementType) -> QWidget:
         result = None
-        match mimeData.elementType:
+        match elementType:
             case LibElementType.LABEL:
                 result = QLabel()
                 result.setText("test label")
@@ -130,7 +130,7 @@ class FormBuilder(QWidget):
 
 
     def calculateDropPlaceSizeFrom(self, mimeData: LibElementMimeData):
-        widget = self.widgetFor(mimeData)
+        widget = self.widgetFor(mimeData.elementType)
         widget.setParent(self)
         widget.show()
         size = widget.size()
@@ -184,16 +184,27 @@ class FormBuilder(QWidget):
         if file.open(QFile.ReadOnly | QFile.Text):
             if domDocument.setContent(file):
                 root = domDocument.documentElement()
-                self.restoreBuilderWindowGeometry(root)
-                
-    
-    def restoreBuilderWindowGeometry(self, domWindow: QDomElement):
+                self.restoreWidgetGeometry(self, root)
+                childNodes = root.childNodes()
+                for i in range(childNodes.count()):
+                    element = childNodes.item(i).toElement()
+                    widget = None
+                    if element is None:
+                        return
+                    if element.nodeName() == "label":
+                        widget = self.widgetFor(LibElementType.LABEL)
+                    if element.nodeName() == "lineEdit":
+                        widget = self.widgetFor(LibElementType.TEXT_INPUT)
+                    self.restoreWidgetGeometry(widget, element)
+                    widget.setParent(self)
+                    
+    def restoreWidgetGeometry(self, widget: QWidget, domElement: QDomElement):
         try:
-            self.setGeometry(
-                int(domWindow.attribute("x", str(self.geometry().x()))),
-                int(domWindow.attribute("y", str(self.geometry().y()))),
-                int(domWindow.attribute("width", str(self.geometry().width()))),
-                int(domWindow.attribute("height", str(self.geometry().height())))
+            widget.setGeometry(
+                int(domElement.attribute("x", str(widget.geometry().x()))),
+                int(domElement.attribute("y", str(widget.geometry().y()))),
+                int(domElement.attribute("width", str(widget.geometry().width()))),
+                int(domElement.attribute("height", str(widget.geometry().height())))
             )
         except ValueError as e:
-            pass
+            pass             
