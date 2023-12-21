@@ -1,4 +1,4 @@
-from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnterEvent, QDropEvent, QMouseEvent, QPainter, QPen
+from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnterEvent, QDragLeaveEvent, QDropEvent, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
 from PySide6.QtCore import Qt, QRect, QPoint, QSize, QFile, QTextStream, QXmlStreamWriter
 from FormElementsLibrary import FormElementsLibrary
@@ -101,16 +101,21 @@ class FormBuilder(QWidget):
         dropAction = drag.exec(Qt.DropAction.MoveAction)             
     
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        print("dragEnter")
         if isinstance(event.mimeData(), LibElementMimeData):
             event.acceptProposedAction()
         if isinstance(event.mimeData(), MoveWidgetMimeData):
             event.acceptProposedAction()
+
+    def dragLeaveEvent(self, event: QDragLeaveEvent):
+        self.hideDropPlaceRect()
 
     def dragMoveEvent(self, event: QDragMoveEvent) -> None:
         event.accept()
         self.updateDropPlaceRectFor(event)
 
     def dropEvent(self, event: QDropEvent) -> None:
+        print("drop event")
         event.accept()
         widget: QWidget
         if isinstance(event.mimeData(), LibElementMimeData):
