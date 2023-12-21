@@ -188,20 +188,8 @@ class FormBuilder(QWidget):
         self.appendGeometryAttributesTo(window, self.geometry())
         domDocument.appendChild(window)
         for widget in self.children():
-            if isinstance(widget, QLabel):
-                labelDom = domDocument.createElement("label") 
-                self.appendGeometryAttributesTo(labelDom, widget.geometry())
-                window.appendChild(labelDom)
-            if isinstance(widget, QLineEdit):
-                lineEditDom = domDocument.createElement("lineEdit")
-                self.appendGeometryAttributesTo(lineEditDom, widget.geometry())
-                window.appendChild(lineEditDom)
-            if isinstance(widget, StackWidget):
-                stackDom = domDocument.createElement("stackWidget")
-                stackDom.setAttribute("x", widget.geometry().x())
-                stackDom.setAttribute("y", widget.geometry().y())
-                window.appendChild(stackDom)
-        
+            self.storeWidgetToDomElement(widget, window, domDocument)
+            
         fileName = "form.xml"
         file = QFile(fileName)
         if file.open(QFile.WriteOnly | QFile.Text):
@@ -209,8 +197,24 @@ class FormBuilder(QWidget):
             domDocument.save(text_stream, 4)
             file.close()
 
-        
-        #self.formStorage.saveGeometry(self.geometry())
+    def storeWidgetToDomElement(self, widget: QWidget, domElement: QDomElement, domDocument: QDomDocument):
+        if isinstance(widget, QLabel):
+            labelDom = domDocument.createElement("label") 
+            self.appendGeometryAttributesTo(labelDom, widget.geometry())
+            domElement.appendChild(labelDom)
+        if isinstance(widget, QLineEdit):
+            lineEditDom = domDocument.createElement("lineEdit")
+            self.appendGeometryAttributesTo(lineEditDom, widget.geometry())
+            domElement.appendChild(lineEditDom)
+        if isinstance(widget, StackWidget):
+            stackDom = domDocument.createElement("stackWidget")
+            stackDom.setAttribute("x", widget.geometry().x())
+            stackDom.setAttribute("y", widget.geometry().y())
+            domElement.appendChild(stackDom)
+            for child in widget.arrangedWidgets():
+                if isinstance(child, QWidget):
+                    self.storeWidgetToDomElement(child, stackDom, domDocument)
+    
     def appendGeometryAttributesTo(self, window: QDomElement, geometry: QRect):
         window.setAttribute("x", geometry.x())
         window.setAttribute("y", geometry.y())
@@ -227,22 +231,31 @@ class FormBuilder(QWidget):
             if domDocument.setContent(file):
                 root = domDocument.documentElement()
                 self.restoreWidgetGeometry(self, root)
-                childNodes = root.childNodes()
-                for i in range(childNodes.count()):
-                    element = childNodes.item(i).toElement()
-                    widget = None
-                    if element is None:
-                        return
-                    if element.nodeName() == "label":
-                        widget = self.libFactory.widgetFor(LibElementType.LABEL)
-                        self.restoreWidgetGeometry(widget, element)
-                    if element.nodeName() == "lineEdit":
-                        widget = self.libFactory.widgetFor(LibElementType.TEXT_INPUT)
-                        self.restoreWidgetGeometry(widget, element)
-                    if element.nodeName() == "stackWidget":
-                        widget = self.libFactory.widgetFor(LibElementType.STACK)
-                        self.restoreWidgetOrigin(widget, element)
-                    widget.setParent(self)
+                self.restoreFromDomElementAsChildOf(root, self)
+                
+
+    def restoreFromDomElementAsChildOf(self, root: QDomElement, parent: QWidget):
+        childNodes = root.childNodes()
+        for i in range(childNodes.count()):
+            element = childNodes.item(i).toElement()
+            widget = None
+            if element is None:
+                return
+            if element.nodeName() == "label":
+                widget = self.libFactory.widgetFor(LibElementType.LABEL)
+                self.restoreWidgetGeometry(widget, element)
+            if element.nodeName() == "lineEdit":
+                widget = self.libFactory.widgetFor(LibElementType.TEXT_INPUT)
+                self.restoreWidgetGeometry(widget, element)
+            if element.nodeName() == "stackWidget":
+                widget = self.libFactory.widgetFor(LibElementType.STACK)
+                self.restoreWidgetOrigin(widget, element)
+                self.restoreFromDomElementAsChildOf(element, widget)
+            if isinstance(parent, StackWidget):
+                parent.addArrangedWidget(widget)
+            else:
+                widget.setParent(parent)
+                
 
     def restoreWidgetOrigin(self, widget: QWidget, domElement: QDomElement):
         try:

@@ -17,6 +17,14 @@ class StackWidget(QWidget):
     def addArrangedWidget(self, wgt: QWidget):
         self.boxLayout.addWidget(wgt)
         wgt.show()
+
+    def arrangedWidgets(self) -> [QWidget]:
+        result = []
+        for i in range(self.boxLayout.count()):
+            item = self.boxLayout.itemAt(i)
+            if item.widget():
+                result.append(item.widget())
+        return result
     
     def sizeHint(self) -> QSize:
         if self.boxLayout.count() == 0:
