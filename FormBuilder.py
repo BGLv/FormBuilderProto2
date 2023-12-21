@@ -46,10 +46,11 @@ class FormBuilder(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         self.dragStartHelper.saveDragStartPos(event)
+        self.selectedWidget = None
         if event.button() == Qt.MouseButton.LeftButton :
-            self.selectedWidget = self.childAt(event.pos())
-        else:
-            self.selectedWidget = None
+            widgetAtPos = self.childAt(event.pos())
+            if widgetAtPos is not None and widgetAtPos.parent() == self:
+                self.selectedWidget = widgetAtPos
         self.update()
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
