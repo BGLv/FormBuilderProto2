@@ -1,9 +1,5 @@
-from enum import Enum
 from PySide6.QtCore import QMimeData
-
-class LibElementType(Enum):
-    LABEL = "LABEL"
-    TEXT_INPUT = "TEXT_INPUT"
+from LibElementType import LibElementType
 
 class LibElementMimeData(QMimeData):
     def __init__(self, type: LibElementType) -> None:
