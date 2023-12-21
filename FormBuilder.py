@@ -90,6 +90,14 @@ class FormBuilder(QWidget):
     #####################################
     # Drag and Drop
     def startDrag(self, widget: QWidget):
+        try:
+            parent = widget.parentWidget()
+            layout = parent.layout()
+            layout.removeWidget(widget)
+            parent.adjustSize()
+        except AttributeError:
+            pass
+                    
         widget.setParent(None)
         drag = QDrag(self)
         mimeData = MoveWidgetMimeData()
@@ -114,6 +122,7 @@ class FormBuilder(QWidget):
     def dragMoveEvent(self, event: QDragMoveEvent) -> None:
         event.accept()
         self.updateDropPlaceRectFor(event)
+        self.selectedWidget = None
 
     def dropEvent(self, event: QDropEvent) -> None:
         print("drop event")
