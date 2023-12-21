@@ -2,6 +2,7 @@ from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnte
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
 from PySide6.QtCore import Qt, QRect, QPoint, QSize, QFile, QTextStream, QXmlStreamWriter
 from FormElementsLibrary import FormElementsLibrary
+from LibElementFactory import LibElementFactory
 from StackWidget import StackWidget
 from metaClasses.SingletonMeta import SingletonMeta
 from mimeData.LibElementMimeData import *
@@ -17,6 +18,7 @@ class FormBuilder(QWidget):
     def __init__(self):
         super().__init__()
         self.formStorage = FormStorage()
+        self.libFactory = LibElementFactory()
         self.cachedElementSize = {}
         self.dropPlaceRect = None
         self.selectedWidget = None
@@ -112,7 +114,7 @@ class FormBuilder(QWidget):
         event.accept()
         widget: QWidget
         if isinstance(event.mimeData(), LibElementMimeData):
-            widget = self.widgetFor(event.mimeData().elementType)
+            widget = self.libFactory.widgetFor(event.mimeData().elementType)
         if isinstance(event.mimeData(), MoveWidgetMimeData):
             widget = event.mimeData().widget
         if widget is None:
@@ -121,20 +123,6 @@ class FormBuilder(QWidget):
         widget.setParent(self)
         widget.show()
         self.hideDropPlaceRect()
-
-    def widgetFor(self, elementType: LibElementType) -> QWidget:
-        result = None
-        match elementType:
-            case LibElementType.LABEL:
-                result = QLabel()
-                result.setText("test label")
-            case LibElementType.TEXT_INPUT:
-                result = QLineEdit()
-                result.setReadOnly(True)
-                result.setEnabled(False)
-            case LibElementType.STACK:
-                result = StackWidget()
-        return result
     
     def widgetToDrag(self) -> QWidget:
         return self.childAt(self.dragStartHelper.dragStartPos)
@@ -162,7 +150,7 @@ class FormBuilder(QWidget):
 
 
     def calculateDropPlaceSizeFrom(self, mimeData: LibElementMimeData):
-        widget = self.widgetFor(mimeData.elementType)
+        widget = self.libFactory.widgetFor(mimeData.elementType)
         if widget is None:
             return
         widget.setParent(self)
@@ -231,13 +219,13 @@ class FormBuilder(QWidget):
                     if element is None:
                         return
                     if element.nodeName() == "label":
-                        widget = self.widgetFor(LibElementType.LABEL)
+                        widget = self.libFactory.widgetFor(LibElementType.LABEL)
                         self.restoreWidgetGeometry(widget, element)
                     if element.nodeName() == "lineEdit":
-                        widget = self.widgetFor(LibElementType.TEXT_INPUT)
+                        widget = self.libFactory.widgetFor(LibElementType.TEXT_INPUT)
                         self.restoreWidgetGeometry(widget, element)
                     if element.nodeName() == "stackWidget":
-                        widget = self.widgetFor(LibElementType.STACK)
+                        widget = self.libFactory.widgetFor(LibElementType.STACK)
                         self.restoreWidgetOrigin(widget, element)
                     widget.setParent(self)
 
