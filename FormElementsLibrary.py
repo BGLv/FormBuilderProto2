@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QLineEdit
 from PySide6.QtGui import QDrag, QMouseEvent, QPixmap
 from PySide6.QtCore import Qt
+from StackWidget import StackWidget
 import res.LibElementIcons_rc as LibElementIcons_rc
 from mimeData.LibElementMimeData import *
 from DragStartHelper import *
@@ -20,6 +21,10 @@ class FormElementsLibrary(QWidget):
         self.line_edit_icon_label = QLabel()
         self.line_edit_icon_label.setPixmap(line_edit_icon)
         layout.addWidget(self.line_edit_icon_label)
+
+        self.stack_widget_icon_label = QLabel()
+        self.stack_widget_icon_label.setText("StackWidget")
+        layout.addWidget(self.stack_widget_icon_label)
 
         layout.addStretch(1)
 
@@ -45,6 +50,9 @@ class FormElementsLibrary(QWidget):
         if self.line_edit_icon_label.geometry().contains(self.dragStartHelper.dragStartPos):
             mimeData = LibElementMimeData(LibElementType.TEXT_INPUT)
             pixmap = self.newLineEditPixmap()
+        if self.stack_widget_icon_label.geometry().contains(self.dragStartHelper.dragStartPos):
+            mimeData = LibElementMimeData(LibElementType.STACK)
+            pixmap = self.newStackPixmap()
         if pixmap is None or mimeData is None:
             return
         drag.setMimeData(mimeData)
@@ -63,3 +71,7 @@ class FormElementsLibrary(QWidget):
     def newLineEditPixmap(self) -> QPixmap:
         lineEdit = QLineEdit()
         return lineEdit.grab()
+    
+    def newStackPixmap(self) -> QPixmap:
+        stack = StackWidget()
+        return stack.grab()

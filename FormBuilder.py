@@ -2,6 +2,7 @@ from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnte
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
 from PySide6.QtCore import Qt, QRect, QPoint, QSize, QFile, QTextStream, QXmlStreamWriter
 from FormElementsLibrary import FormElementsLibrary
+from StackWidget import StackWidget
 from metaClasses.SingletonMeta import SingletonMeta
 from mimeData.LibElementMimeData import *
 from mimeData.MoveWidgetMimeData import *
@@ -56,7 +57,7 @@ class FormBuilder(QWidget):
                 self.startDrag(widgetToDrag)
 
     def keyPressEvent(self, event):
-       if event.key() in [Qt.Key_Delete, Qt.Key_Backspace]:
+       if event.key() in [Qt.Key_Delete, Qt.Key_Backspace] and self.selectedWidget is not None:
            self.selectedWidget.setParent(None)
            self.selectedWidget = None
            self.update()
@@ -131,6 +132,8 @@ class FormBuilder(QWidget):
                 result = QLineEdit()
                 result.setReadOnly(True)
                 result.setEnabled(False)
+            case LibElementType.STACK:
+                result = StackWidget()
         return result
     
     def widgetToDrag(self) -> QWidget:
@@ -160,6 +163,8 @@ class FormBuilder(QWidget):
 
     def calculateDropPlaceSizeFrom(self, mimeData: LibElementMimeData):
         widget = self.widgetFor(mimeData.elementType)
+        if widget is None:
+            return
         widget.setParent(self)
         widget.show()
         size = widget.size()
@@ -188,6 +193,11 @@ class FormBuilder(QWidget):
                 lineEditDom = domDocument.createElement("lineEdit")
                 self.appendGeometryAttributesTo(lineEditDom, widget.geometry())
                 window.appendChild(lineEditDom)
+            if isinstance(widget, StackWidget):
+                stackDom = domDocument.createElement("stackWidget")
+                stackDom.setAttribute("x", widget.geometry().x())
+                stackDom.setAttribute("y", widget.geometry().y())
+                window.appendChild(stackDom)
         
         fileName = "form.xml"
         file = QFile(fileName)
@@ -222,10 +232,23 @@ class FormBuilder(QWidget):
                         return
                     if element.nodeName() == "label":
                         widget = self.widgetFor(LibElementType.LABEL)
+                        self.restoreWidgetGeometry(widget, element)
                     if element.nodeName() == "lineEdit":
                         widget = self.widgetFor(LibElementType.TEXT_INPUT)
-                    self.restoreWidgetGeometry(widget, element)
+                        self.restoreWidgetGeometry(widget, element)
+                    if element.nodeName() == "stackWidget":
+                        widget = self.widgetFor(LibElementType.STACK)
+                        self.restoreWidgetOrigin(widget, element)
                     widget.setParent(self)
+
+    def restoreWidgetOrigin(self, widget: QWidget, domElement: QDomElement):
+        try:
+            widget.move(
+                int(domElement.attribute("x", str(widget.geometry().x()))),
+                int(domElement.attribute("y", str(widget.geometry().y()))),
+            )
+        except ValueError as e:
+            pass 
                     
     def restoreWidgetGeometry(self, widget: QWidget, domElement: QDomElement):
         try:
