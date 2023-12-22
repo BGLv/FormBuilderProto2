@@ -1,6 +1,7 @@
 from PySide6.QtGui import QDrag, QDragMoveEvent, QPaintEvent, QPixmap, QDragEnterEvent, QDragLeaveEvent, QDropEvent, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget, QLabel, QLineEdit
 from PySide6.QtCore import Qt, QRect, QPoint, QSize, QFile, QTextStream, QXmlStreamWriter
+from FormElementSelectionHelper import FormElementSelectionHelper
 from FormElementsLibrary import FormElementsLibrary
 from LibElementFactory import LibElementFactory
 from StackWidget import StackWidget
@@ -21,7 +22,7 @@ class FormBuilder(QWidget):
         self.libFactory = LibElementFactory()
         self.cachedElementSize = {}
         self.dropPlaceRect = None
-        self.selectedWidget = None
+        self.selectionHelper = FormElementSelectionHelper()
         self.resize(400, 400)
         self.setAcceptDrops(True)
 
@@ -46,11 +47,7 @@ class FormBuilder(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         self.dragStartHelper.saveDragStartPos(event)
-        self.selectedWidget = None
-        if event.button() == Qt.MouseButton.LeftButton :
-            widgetAtPos = self.childAt(event.pos())
-            if widgetAtPos is not None and widgetAtPos.parent() == self:
-                self.selectedWidget = widgetAtPos
+        self.selectionHelper.handleMousePressEvent(self, event)
         self.update()
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
@@ -60,15 +57,14 @@ class FormBuilder(QWidget):
                 self.startDrag(widgetToDrag)
 
     def keyPressEvent(self, event):
-        if event.key() in [Qt.Key_Delete, Qt.Key_Backspace] and self.selectedWidget is not None:
-           self.selectedWidget.setParent(None)
-           self.selectedWidget = None
+        if event.key() in [Qt.Key_Delete, Qt.Key_Backspace] and self.selectionHelper.selectedWidget is not None:
+           self.selectionHelper.removeSelected()
            self.update()
-        if event.key() == Qt.Key.Key_V and isinstance(self.selectedWidget, StackWidget):
-            self.selectedWidget.setAxis(StackWidget.Axis.VERTICAL)
+        if event.key() == Qt.Key.Key_V and isinstance(self.selectionHelper.selectedWidget, StackWidget):
+            self.selectionHelper.selectedWidget.setAxis(StackWidget.Axis.VERTICAL)
             self.update()
-        if event.key() == Qt.Key.Key_H and isinstance(self.selectedWidget, StackWidget):
-            self.selectedWidget.setAxis(StackWidget.Axis.HORIZONTAL)
+        if event.key() == Qt.Key.Key_H and isinstance(self.selectionHelper.selectedWidget, StackWidget):
+            self.selectionHelper.selectedWidget.setAxis(StackWidget.Axis.HORIZONTAL)
             self.update()
         super().keyPressEvent(event)
 
@@ -76,7 +72,7 @@ class FormBuilder(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         self.handleDropPlaceRectDrawing(painter)
-        self.handleSelectedWidgetDrawing(painter)
+        self.selectionHelper.handleSelectedWidgetDrawing(painter)
 
     ####################################
     # drawing
@@ -85,13 +81,6 @@ class FormBuilder(QWidget):
             pen = QPen(Qt.black, 2, Qt.DashLine)
             painter.setPen(pen)
             painter.drawRect(self.dropPlaceRect)
-
-    def handleSelectedWidgetDrawing(self, painter: QPainter):
-         if self.selectedWidget is not None and self.selectedWidget.parent() is not None:
-            pen = QPen(Qt.blue, 1, Qt.SolidLine)
-            painter.setPen(pen)
-            painter.drawRect(self.selectedWidget.geometry())
-
 
     #####################################
     # Drag and Drop
@@ -120,7 +109,6 @@ class FormBuilder(QWidget):
     def dragMoveEvent(self, event: QDragMoveEvent) -> None:
         event.accept()
         self.updateDropPlaceRectFor(event)
-        self.selectedWidget = None
 
     def dropEvent(self, event: QDropEvent) -> None:
         print("drop event")
