@@ -1,7 +1,7 @@
 from typing import Optional
 from PySide6.QtGui import QPaintEvent, QPainter, QPen, QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import QWidget, QBoxLayout, QSizePolicy
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QChildEvent
 from mimeData.LibElementMimeData import LibElementMimeData
 from mimeData.MoveWidgetMimeData import MoveWidgetMimeData
 
@@ -37,6 +37,15 @@ class StackWidget(QWidget):
         pen = QPen(Qt.gray, 1, Qt.DashLine)
         painter.setPen(pen)
         painter.drawRect(self.rect().adjusted(1,1,-1,-1))
+
+    def childEvent(self, event: QChildEvent) -> None:
+        self.adjustSize()
+        return super().childEvent(event)
+    
+    def adjustSize(self) -> None:
+        super().adjustSize()
+        if isinstance(self.parent(), StackWidget):
+            self.parent().adjustSize()
 
     ############################
     # Drop

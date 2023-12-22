@@ -89,15 +89,7 @@ class FormBuilder(QWidget):
 
     #####################################
     # Drag and Drop
-    def startDrag(self, widget: QWidget):
-        try:
-            parent = widget.parentWidget()
-            layout = parent.layout()
-            layout.removeWidget(widget)
-            parent.adjustSize()
-        except AttributeError:
-            pass
-                    
+    def startDrag(self, widget: QWidget):                  
         widget.setParent(None)
         drag = QDrag(self)
         mimeData = MoveWidgetMimeData()
