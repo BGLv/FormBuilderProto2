@@ -196,6 +196,7 @@ class FormBuilder(QWidget):
             stackDom = domDocument.createElement("stackWidget")
             stackDom.setAttribute("x", widget.geometry().x())
             stackDom.setAttribute("y", widget.geometry().y())
+            stackDom.setAttribute("axis", widget.axis().value)
             domElement.appendChild(stackDom)
             for child in widget.arrangedWidgets():
                 if isinstance(child, QWidget):
@@ -236,6 +237,7 @@ class FormBuilder(QWidget):
             if element.nodeName() == "stackWidget":
                 widget = self.libFactory.widgetFor(LibElementType.STACK)
                 self.restoreWidgetOrigin(widget, element)
+                self.restoreWidgetAxis(widget, element)
                 self.restoreFromDomElementAsChildOf(element, widget)
             if isinstance(parent, StackWidget):
                 parent.addArrangedWidget(widget)
@@ -251,6 +253,16 @@ class FormBuilder(QWidget):
             )
         except ValueError as e:
             pass 
+
+    def restoreWidgetAxis(self, widget: QWidget, domElement: QDomElement):
+        try:
+            allowedAxis = [StackWidget.Axis.HORIZONTAL.value, StackWidget.Axis.VERTICAL.value]
+            if domElement.attribute("axis") in allowedAxis:
+                widget.setAxis(StackWidget.Axis[domElement.attribute("axis")])
+        except AttributeError as e:
+            pass
+        except ValueError as e:
+            pass
                     
     def restoreWidgetGeometry(self, widget: QWidget, domElement: QDomElement):
         try:
