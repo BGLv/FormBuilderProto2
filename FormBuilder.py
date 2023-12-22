@@ -60,11 +60,17 @@ class FormBuilder(QWidget):
                 self.startDrag(widgetToDrag)
 
     def keyPressEvent(self, event):
-       if event.key() in [Qt.Key_Delete, Qt.Key_Backspace] and self.selectedWidget is not None:
+        if event.key() in [Qt.Key_Delete, Qt.Key_Backspace] and self.selectedWidget is not None:
            self.selectedWidget.setParent(None)
            self.selectedWidget = None
            self.update()
-       super().keyPressEvent(event)
+        if event.key() == Qt.Key.Key_V and isinstance(self.selectedWidget, StackWidget):
+            self.selectedWidget.setAxis(StackWidget.Axis.VERTICAL)
+            self.update()
+        if event.key() == Qt.Key.Key_H and isinstance(self.selectedWidget, StackWidget):
+            self.selectedWidget.setAxis(StackWidget.Axis.HORIZONTAL)
+            self.update()
+        super().keyPressEvent(event)
 
     def paintEvent(self, event: QPaintEvent) -> None:
         painter = QPainter(self)

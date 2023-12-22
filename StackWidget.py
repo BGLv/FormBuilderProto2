@@ -1,4 +1,5 @@
 from typing import Optional
+from enum import Enum
 from PySide6.QtGui import QPaintEvent, QPainter, QPen, QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import QWidget, QBoxLayout, QSizePolicy
 from PySide6.QtCore import Qt, QSize, QChildEvent
@@ -6,13 +7,30 @@ from mimeData.LibElementMimeData import LibElementMimeData
 from mimeData.MoveWidgetMimeData import MoveWidgetMimeData
 
 class StackWidget(QWidget):
+    class Axis(Enum):
+        HORIZONTAL = "HORIZONTAL"
+        VERTICAL = "VERTICAL"
+
     def __init__(self) -> None:
         super().__init__()
         from LibElementFactory import LibElementFactory
         self.libFactory = LibElementFactory()
         self.boxLayout = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self._axis = StackWidget.Axis.VERTICAL
         self.setLayout(self.boxLayout)
         self.setAcceptDrops(True)
+
+    def axis(self) -> Axis:
+        return self._axis
+    
+    def setAxis(self, axis: Axis):
+        self._axis = axis
+        match axis:
+            case StackWidget.Axis.HORIZONTAL:
+                self.boxLayout.setDirection(QBoxLayout.Direction.LeftToRight)
+            case StackWidget.Axis.VERTICAL:
+                self.boxLayout.setDirection(QBoxLayout.Direction.TopToBottom)
+        self.adjustSize()
 
     def addArrangedWidget(self, wgt: QWidget):
         self.boxLayout.addWidget(wgt)
