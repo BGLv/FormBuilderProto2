@@ -38,6 +38,8 @@ class StackWidget(QWidget):
         painter.setPen(pen)
         painter.drawRect(self.rect().adjusted(1,1,-1,-1))
 
+    ################################################
+    # for correct sizing by adding or removing sub widgets
     def childEvent(self, event: QChildEvent) -> None:
         self.adjustSize()
         return super().childEvent(event)
@@ -46,6 +48,7 @@ class StackWidget(QWidget):
         super().adjustSize()
         if isinstance(self.parent(), StackWidget):
             self.parent().adjustSize()
+    ################################################
 
     ############################
     # Drop
