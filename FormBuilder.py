@@ -97,7 +97,6 @@ class FormBuilder(QWidget):
         dropAction = drag.exec(Qt.DropAction.MoveAction)             
     
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
-        print("dragEnter")
         if isinstance(event.mimeData(), LibElementMimeData):
             event.acceptProposedAction()
         if isinstance(event.mimeData(), MoveWidgetMimeData):
@@ -111,7 +110,6 @@ class FormBuilder(QWidget):
         self.updateDropPlaceRectFor(event)
 
     def dropEvent(self, event: QDropEvent) -> None:
-        print("drop event")
         event.accept()
         widget: QWidget
         if isinstance(event.mimeData(), LibElementMimeData):

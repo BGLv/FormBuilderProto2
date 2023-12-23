@@ -57,8 +57,7 @@ class FormElementsLibrary(QWidget):
             return
         drag.setMimeData(mimeData)
         drag.setPixmap(pixmap)
-        dropAction = drag.exec(Qt.DropAction.CopyAction) 
-        print("start drag")
+        dropAction = drag.exec(Qt.DropAction.CopyAction)
     #################################
 
     # utility
